@@ -43,6 +43,7 @@
       this.checkboxStayToSystemtray = new System.Windows.Forms.CheckBox();
       this.buttonCopyToClipboard = new System.Windows.Forms.Button();
       this.buttonShowInfos = new System.Windows.Forms.Button();
+      this.buttonShowStatistics = new System.Windows.Forms.Button();
       ((System.ComponentModel.ISupportInitialize)(this.FileSystemWatcher)).BeginInit();
       this.SuspendLayout();
       // 
@@ -73,7 +74,7 @@
       this.buttonOpenFolder.Location = new System.Drawing.Point(667, 13);
       this.buttonOpenFolder.Name = "buttonOpenFolder";
       this.buttonOpenFolder.Size = new System.Drawing.Size(75, 23);
-      this.buttonOpenFolder.TabIndex = 15;
+      this.buttonOpenFolder.TabIndex = 1;
       this.buttonOpenFolder.Text = "Verzeichnis";
       this.buttonOpenFolder.UseVisualStyleBackColor = true;
       this.buttonOpenFolder.Click += new System.EventHandler(this.buttonOpenFolder_Click);
@@ -89,7 +90,7 @@
       this.listviewWatch.Location = new System.Drawing.Point(20, 41);
       this.listviewWatch.Name = "listviewWatch";
       this.listviewWatch.Size = new System.Drawing.Size(722, 287);
-      this.listviewWatch.TabIndex = 19;
+      this.listviewWatch.TabIndex = 2;
       this.listviewWatch.UseCompatibleStateImageBehavior = false;
       this.listviewWatch.View = System.Windows.Forms.View.Details;
       // 
@@ -104,7 +105,7 @@
       this.buttonSaveList.Location = new System.Drawing.Point(546, 334);
       this.buttonSaveList.Name = "buttonSaveList";
       this.buttonSaveList.Size = new System.Drawing.Size(95, 23);
-      this.buttonSaveList.TabIndex = 18;
+      this.buttonSaveList.TabIndex = 7;
       this.buttonSaveList.Text = "Liste speichern";
       this.buttonSaveList.UseVisualStyleBackColor = true;
       this.buttonSaveList.Click += new System.EventHandler(this.buttonSaveList_Click);
@@ -115,7 +116,7 @@
       this.buttonDeleteList.Location = new System.Drawing.Point(647, 334);
       this.buttonDeleteList.Name = "buttonDeleteList";
       this.buttonDeleteList.Size = new System.Drawing.Size(95, 23);
-      this.buttonDeleteList.TabIndex = 17;
+      this.buttonDeleteList.TabIndex = 8;
       this.buttonDeleteList.Text = "Liste löschen";
       this.buttonDeleteList.UseVisualStyleBackColor = true;
       this.buttonDeleteList.Click += new System.EventHandler(this.buttonDeleteList_Click);
@@ -128,7 +129,7 @@
       this.textboxPath.Name = "textboxPath";
       this.textboxPath.ReadOnly = true;
       this.textboxPath.Size = new System.Drawing.Size(641, 20);
-      this.textboxPath.TabIndex = 16;
+      this.textboxPath.TabIndex = 0;
       // 
       // checkboxStayToSystemtray
       // 
@@ -139,7 +140,7 @@
       this.checkboxStayToSystemtray.Location = new System.Drawing.Point(231, 338);
       this.checkboxStayToSystemtray.Name = "checkboxStayToSystemtray";
       this.checkboxStayToSystemtray.Size = new System.Drawing.Size(132, 17);
-      this.checkboxStayToSystemtray.TabIndex = 20;
+      this.checkboxStayToSystemtray.TabIndex = 5;
       this.checkboxStayToSystemtray.Text = "Systemtray Information";
       this.checkboxStayToSystemtray.UseVisualStyleBackColor = true;
       // 
@@ -149,7 +150,7 @@
       this.buttonCopyToClipboard.Location = new System.Drawing.Point(369, 334);
       this.buttonCopyToClipboard.Name = "buttonCopyToClipboard";
       this.buttonCopyToClipboard.Size = new System.Drawing.Size(171, 23);
-      this.buttonCopyToClipboard.TabIndex = 21;
+      this.buttonCopyToClipboard.TabIndex = 6;
       this.buttonCopyToClipboard.Text = "In die Zwischenablage kopieren";
       this.buttonCopyToClipboard.UseVisualStyleBackColor = true;
       this.buttonCopyToClipboard.Click += new System.EventHandler(this.buttonCopyToClipboard_Click);
@@ -160,16 +161,28 @@
       this.buttonShowInfos.Location = new System.Drawing.Point(20, 334);
       this.buttonShowInfos.Name = "buttonShowInfos";
       this.buttonShowInfos.Size = new System.Drawing.Size(75, 23);
-      this.buttonShowInfos.TabIndex = 22;
+      this.buttonShowInfos.TabIndex = 3;
       this.buttonShowInfos.Text = "Infos";
       this.buttonShowInfos.UseVisualStyleBackColor = true;
       this.buttonShowInfos.Click += new System.EventHandler(this.buttonShowInfos_Click);
+      // 
+      // buttonShowStatistics
+      // 
+      this.buttonShowStatistics.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+      this.buttonShowStatistics.Location = new System.Drawing.Point(101, 334);
+      this.buttonShowStatistics.Name = "buttonShowStatistics";
+      this.buttonShowStatistics.Size = new System.Drawing.Size(75, 23);
+      this.buttonShowStatistics.TabIndex = 4;
+      this.buttonShowStatistics.Text = "Statistik";
+      this.buttonShowStatistics.UseVisualStyleBackColor = true;
+      this.buttonShowStatistics.Click += new System.EventHandler(this.buttonShowStatistics_Click);
       // 
       // Form
       // 
       this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
       this.ClientSize = new System.Drawing.Size(762, 371);
+      this.Controls.Add(this.buttonShowStatistics);
       this.Controls.Add(this.buttonShowInfos);
       this.Controls.Add(this.buttonCopyToClipboard);
       this.Controls.Add(this.buttonOpenFolder);
@@ -206,6 +219,7 @@
     internal System.Windows.Forms.NotifyIcon NotifyIcon;
     private System.Windows.Forms.Button buttonCopyToClipboard;
     private System.Windows.Forms.Button buttonShowInfos;
+    private System.Windows.Forms.Button buttonShowStatistics;
   }
 }
 

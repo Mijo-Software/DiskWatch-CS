@@ -48,6 +48,10 @@ namespace DiskwatchCS
     private void buttonDeleteList_Click(object sender, EventArgs e)
     {
       listviewWatch.Items.Clear();
+      longintCounterFilesChanged = 0;
+      longintCounterFilesDeleted = 0;
+      longintCounterFilesCreated = 0;
+      longintCounterFilesRenamed = 0;
     }
 
     private void Form_Load(object sender, EventArgs e)
@@ -62,6 +66,7 @@ namespace DiskwatchCS
       listviewWatch.Items.Add(e.FullPath + " wurde geändert | " + DateTime.Now.ToString("yyyyMMddHHmmss.fff", System.Globalization.DateTimeFormatInfo.InvariantInfo)).ForeColor = Color.Blue;
       listviewWatch.EnsureVisible(listviewWatch.Items.Count - 1);
       listviewWatch.Update();
+      longintCounterFilesChanged++;
     }
 
     private void FileSystemWatcher_Created(object sender, FileSystemEventArgs e)
@@ -75,6 +80,7 @@ namespace DiskwatchCS
       }
       listviewWatch.EnsureVisible(listviewWatch.Items.Count - 1);
       listviewWatch.Update();
+      longintCounterFilesCreated++;
     }
 
     private void FileSystemWatcher_Deleted(object sender, FileSystemEventArgs e)
@@ -82,6 +88,7 @@ namespace DiskwatchCS
       listviewWatch.Items.Add(e.FullPath + " wurde gelöscht | " + DateTime.Now.ToString("yyyyMMddHHmmss.fff", System.Globalization.DateTimeFormatInfo.InvariantInfo)).ForeColor = Color.Red;
       listviewWatch.EnsureVisible(listviewWatch.Items.Count - 1);
       listviewWatch.Update();
+      longintCounterFilesDeleted++;
     }
 
     private void FileSystemWatcher_Renamed(object sender, RenamedEventArgs e)
@@ -89,6 +96,7 @@ namespace DiskwatchCS
       listviewWatch.Items.Add(e.FullPath + " wurde umbenannt | " + DateTime.Now.ToString("yyyyMMddHHmmss.ffffff", System.Globalization.DateTimeFormatInfo.InvariantInfo)).ForeColor = Color.Black;
       listviewWatch.EnsureVisible(listviewWatch.Items.Count - 1);
       listviewWatch.Update();
+      longintCounterFilesRenamed++;
     }
 
     private void Form_SizeChanged(object sender, EventArgs e)
@@ -101,6 +109,17 @@ namespace DiskwatchCS
           NotifyIcon.Visible = true;
         }
       }
+    }
+
+    private void buttonShowStatistics_Click(object sender, EventArgs e)
+    {
+      long longintCounter = longintCounterFilesCreated + longintCounterFilesChanged + longintCounterFilesRenamed + longintCounterFilesDeleted;
+      MessageBox.Show(longintCounter.ToString() + " Dateienoperationen wurden ausgeführt:\r\r" +
+        "Erstellt: " + longintCounterFilesCreated.ToString() + " (" + (longintCounterFilesCreated / (float)longintCounter * 100.0).ToString("0.00") + "%)\r" +
+        "Verändert: " + longintCounterFilesChanged.ToString() + " (" + (longintCounterFilesChanged / (float)longintCounter * 100.0).ToString("0.00") + "%)\r" +
+        "Umbenannt: " + longintCounterFilesRenamed.ToString() + " (" + (longintCounterFilesRenamed / (float)longintCounter * 100.0).ToString("0.00") + "%)\r" +
+        "Gelöscht: " + longintCounterFilesDeleted.ToString() + " (" + (longintCounterFilesDeleted / (float)longintCounter * 100.0).ToString("0.00") + "%)\r", "Statistik"
+      );
     }
 
     private void NotifyIcon_MouseDoubleClick(object sender, MouseEventArgs e)
