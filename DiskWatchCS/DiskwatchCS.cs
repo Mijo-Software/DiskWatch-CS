@@ -14,7 +14,9 @@ namespace DiskwatchCS
   public partial class Form : System.Windows.Forms.Form
   {
 
-    long longintCounterFilesChanged, longintCounterFilesDeleted, longintCounterFilesCreated, longintCounterFilesRenamed;
+    long longintCounterFiles, longintCounterFilesChanged, longintCounterFilesDeleted, longintCounterFilesCreated, longintCounterFilesRenamed;
+    bool isStarting;
+    DateTime dtStartMeasurements, dtEndMeasurements;
 
     public Form()
     {
@@ -23,11 +25,13 @@ namespace DiskwatchCS
 
     private void buttonOpenFolder_Click(object sender, EventArgs e)
     {
-      FolderBrowserDialog.ShowDialog();
-      if (Directory.Exists(FolderBrowserDialog.SelectedPath))
+      if (FolderBrowserDialog.ShowDialog() == DialogResult.OK)
       {
-        textboxPath.Text = FolderBrowserDialog.SelectedPath;
-        FileSystemWatcher.Path = textboxPath.Text;
+        if (Directory.Exists(FolderBrowserDialog.SelectedPath))
+        {
+          textboxPath.Text = FolderBrowserDialog.SelectedPath;
+          FileSystemWatcher.Path = textboxPath.Text;
+        }
       }
     }
 
@@ -58,10 +62,15 @@ namespace DiskwatchCS
     private void buttonDeleteList_Click(object sender, EventArgs e)
     {
       listviewWatch.Items.Clear();
-      longintCounterFilesChanged = 0;
-      longintCounterFilesDeleted = 0;
       longintCounterFilesCreated = 0;
+      longintCounterFilesDeleted = 0;
+      longintCounterFilesChanged = 0;
       longintCounterFilesRenamed = 0;
+      labelCounterFiles.Text = "0";
+      labelCounterFilesCreated.Text = "0";
+      labelCounterFilesDeleted.Text = "0";
+      labelCounterFilesChanged.Text = "0";
+      labelCounterFilesRenamed.Text = "0";
     }
 
     private void Form_Load(object sender, EventArgs e)
@@ -69,74 +78,115 @@ namespace DiskwatchCS
       textboxPath.Text = "C:\\";
       FileSystemWatcher.Path = textboxPath.Text;
       listviewWatch.GridLines = true;
+      isStarting = true;
+      checkboxHoldOnTop.Checked = false;
+      checkboxMinimizeToSystemtray.Checked = false;
+      buttonStart.Enabled = false;
+      labelCounterFiles.Text = "0";
+      labelCounterFilesCreated.Text = "0";
+      labelCounterFilesDeleted.Text = "0";
+      labelCounterFilesRenamed.Text = "0";
+      labelCounterFilesDeleted.Text = "0";
+      dtStartMeasurements = DateTime.Now;
+      labelTimeBeginMeasured.Text = dtStartMeasurements.ToString("HH:mm:ss", System.Globalization.DateTimeFormatInfo.InvariantInfo) + " hms";
+      labelTimeEndMeasured.Text = "";
+      timer.Start();
     }
 
     private void FileSystemWatcher_Created(object sender, FileSystemEventArgs e)
     {
-      if (NotifyIcon.Visible)
+      if (isStarting)
       {
-        NotifyIcon.BalloonTipText = e.FullPath + " wurde erstellt.";
-        NotifyIcon.ShowBalloonTip(3000);
+        if (NotifyIcon.Visible)
+        {
+          NotifyIcon.BalloonTipText = e.FullPath + " wurde erstellt.";
+          NotifyIcon.ShowBalloonTip(3000);
+        }
+        ListViewItem lvi = new ListViewItem();
+        lvi.ImageIndex = 0;
+        lvi.ToolTipText = "Datei wurde erstellt";
+        lvi.ForeColor = Color.Green;
+        lvi.SubItems.Add(DateTime.Now.ToString("yyyyMMddHHmmss.fffffff", System.Globalization.DateTimeFormatInfo.InvariantInfo));
+        lvi.SubItems.Add(e.FullPath);
+        listviewWatch.Items.Add(lvi);
+        listviewWatch.EnsureVisible(listviewWatch.Items.Count - 1);
+        listviewWatch.Update();
+        longintCounterFilesCreated++;
+        longintCounterFiles = longintCounterFilesCreated + longintCounterFilesChanged + longintCounterFilesRenamed + longintCounterFilesDeleted;
+        labelCounterFilesCreated.Text = longintCounterFilesCreated.ToString();
+        labelCounterFilesCreatedPercent.Text = (longintCounterFilesCreated / (float)longintCounterFiles * 100.0).ToString("00.0000") + "%";
+        labelCounterFiles.Text = longintCounterFiles.ToString();
       }
-      ListViewItem lvi = new ListViewItem();
-      lvi.ImageIndex = 0;
-      lvi.ToolTipText = "Datei wurde erstellt";
-      lvi.ForeColor = Color.Green;
-      lvi.SubItems.Add(DateTime.Now.ToString("yyyyMMddHHmmss.fffffff", System.Globalization.DateTimeFormatInfo.InvariantInfo));
-      lvi.SubItems.Add(e.FullPath);
-      listviewWatch.Items.Add(lvi);
-      listviewWatch.EnsureVisible(listviewWatch.Items.Count - 1);
-      listviewWatch.Update();
-      longintCounterFilesCreated++;
     }
 
     private void FileSystemWatcher_Deleted(object sender, FileSystemEventArgs e)
     {
-      ListViewItem lvi = new ListViewItem();
-      lvi.ImageIndex = 1;
-      lvi.ToolTipText = "Datei wurde gelöscht";
-      lvi.ForeColor = Color.Red;
-      lvi.SubItems.Add(DateTime.Now.ToString("yyyyMMddHHmmss.fffffff", System.Globalization.DateTimeFormatInfo.InvariantInfo));
-      lvi.SubItems.Add(e.FullPath);
-      listviewWatch.Items.Add(lvi);
-      listviewWatch.EnsureVisible(listviewWatch.Items.Count - 1);
-      listviewWatch.Update();
-      longintCounterFilesDeleted++;
+      if (isStarting)
+      {
+        ListViewItem lvi = new ListViewItem();
+        lvi.ImageIndex = 1;
+        lvi.ToolTipText = "Datei wurde gelöscht";
+        lvi.ForeColor = Color.Red;
+        lvi.SubItems.Add(DateTime.Now.ToString("yyyyMMddHHmmss.fffffff", System.Globalization.DateTimeFormatInfo.InvariantInfo));
+        lvi.SubItems.Add(e.FullPath);
+        listviewWatch.Items.Add(lvi);
+        listviewWatch.EnsureVisible(listviewWatch.Items.Count - 1);
+        listviewWatch.Update();
+        longintCounterFilesDeleted++;
+        longintCounterFiles = longintCounterFilesCreated + longintCounterFilesChanged + longintCounterFilesRenamed + longintCounterFilesDeleted;
+        labelCounterFilesDeleted.Text = longintCounterFilesDeleted.ToString();
+        labelCounterFilesDeletedPercent.Text = (longintCounterFilesDeleted / (float)longintCounterFiles * 100.0).ToString("00.0000") + "%";
+        labelCounterFiles.Text = longintCounterFiles.ToString();
+      }
     }
 
     private void FileSystemWatcher_Changed(object sender, FileSystemEventArgs e)
     {
-      ListViewItem lvi = new ListViewItem();
-      lvi.ImageIndex = 2;
-      lvi.ToolTipText = "Datei wurde verändert";
-      lvi.ForeColor = Color.Blue;
-      lvi.SubItems.Add(DateTime.Now.ToString("yyyyMMddHHmmss.fffffff", System.Globalization.DateTimeFormatInfo.InvariantInfo));
-      lvi.SubItems.Add(e.FullPath);
-      listviewWatch.Items.Add(lvi);
-      listviewWatch.EnsureVisible(listviewWatch.Items.Count - 1);
-      listviewWatch.Update();
-      longintCounterFilesChanged++;
+      if (isStarting)
+      {
+        ListViewItem lvi = new ListViewItem();
+        lvi.ImageIndex = 2;
+        lvi.ToolTipText = "Datei wurde verändert";
+        lvi.ForeColor = Color.Blue;
+        lvi.SubItems.Add(DateTime.Now.ToString("yyyyMMddHHmmss.fffffff", System.Globalization.DateTimeFormatInfo.InvariantInfo));
+        lvi.SubItems.Add(e.FullPath);
+        listviewWatch.Items.Add(lvi);
+        listviewWatch.EnsureVisible(listviewWatch.Items.Count - 1);
+        listviewWatch.Update();
+        longintCounterFilesChanged++;
+        longintCounterFiles = longintCounterFilesCreated + longintCounterFilesChanged + longintCounterFilesRenamed + longintCounterFilesDeleted;
+        labelCounterFilesChanged.Text = longintCounterFilesChanged.ToString();
+        labelCounterFilesChangedPercent.Text = (longintCounterFilesChanged / (float)longintCounterFiles * 100.0).ToString("00.0000") + "%";
+        labelCounterFiles.Text = longintCounterFiles.ToString();
+      }
     }
 
     private void FileSystemWatcher_Renamed(object sender, RenamedEventArgs e)
     {
-      ListViewItem lvi = new ListViewItem();
-      lvi.ImageIndex = 3;
-      lvi.ToolTipText = "Datei wurde umbenannt";
-      lvi.ForeColor = Color.Black;
-      lvi.SubItems.Add(DateTime.Now.ToString("yyyyMMddHHmmss.fffffff", System.Globalization.DateTimeFormatInfo.InvariantInfo));
-      lvi.SubItems.Add(e.FullPath);
-      listviewWatch.Items.Add(lvi);
-      listviewWatch.EnsureVisible(listviewWatch.Items.Count - 1);
-      listviewWatch.Update();
-      longintCounterFilesRenamed++;
+      if (isStarting)
+      {
+        ListViewItem lvi = new ListViewItem();
+        lvi.ImageIndex = 3;
+        lvi.ToolTipText = "Datei wurde umbenannt";
+        lvi.ForeColor = Color.Black;
+        lvi.SubItems.Add(DateTime.Now.ToString("yyyyMMddHHmmss.fffffff", System.Globalization.DateTimeFormatInfo.InvariantInfo));
+        lvi.SubItems.Add(e.FullPath);
+        listviewWatch.Items.Add(lvi);
+        listviewWatch.EnsureVisible(listviewWatch.Items.Count - 1);
+        listviewWatch.Update();
+        longintCounterFilesRenamed++;
+        longintCounterFiles = longintCounterFilesCreated + longintCounterFilesChanged + longintCounterFilesRenamed + longintCounterFilesDeleted;
+        labelCounterFilesRenamed.Text = longintCounterFilesRenamed.ToString();
+        labelCounterFilesRenamedPercent.Text = (longintCounterFilesRenamed / (float)longintCounterFiles * 100.0).ToString("00.0000") + "%";
+        labelCounterFiles.Text = longintCounterFiles.ToString();
+      }
     }
 
     private void Form_SizeChanged(object sender, EventArgs e)
     {
       if (this.WindowState == FormWindowState.Minimized)
       {
-        if (checkboxStayToSystemtray.Checked)
+        if (checkboxMinimizeToSystemtray.Checked)
         {
           this.Hide();
           NotifyIcon.Visible = true;
@@ -144,15 +194,42 @@ namespace DiskwatchCS
       }
     }
 
-    private void buttonShowStatistics_Click(object sender, EventArgs e)
+    private void buttonStart_Click(object sender, EventArgs e)
     {
-      long longintCounter = longintCounterFilesCreated + longintCounterFilesChanged + longintCounterFilesRenamed + longintCounterFilesDeleted;
-      MessageBox.Show(longintCounter.ToString() + " Dateienoperationen wurden ausgeführt:\r\r" +
-        "Erstellt: " + longintCounterFilesCreated.ToString() + " (" + (longintCounterFilesCreated / (float)longintCounter * 100.0).ToString("0.00") + "%)\r" +
-        "Verändert: " + longintCounterFilesChanged.ToString() + " (" + (longintCounterFilesChanged / (float)longintCounter * 100.0).ToString("0.00") + "%)\r" +
-        "Umbenannt: " + longintCounterFilesRenamed.ToString() + " (" + (longintCounterFilesRenamed / (float)longintCounter * 100.0).ToString("0.00") + "%)\r" +
-        "Gelöscht: " + longintCounterFilesDeleted.ToString() + " (" + (longintCounterFilesDeleted / (float)longintCounter * 100.0).ToString("0.00") + "%)\r", "Statistik"
-      );
+      isStarting = true;
+      buttonStart.Enabled = false;
+      buttonStop.Enabled = true;
+      timer.Start();
+      dtStartMeasurements = DateTime.Now;
+      labelTimeBeginMeasured.Text = dtStartMeasurements.ToString("HH:mm:ss", System.Globalization.DateTimeFormatInfo.InvariantInfo) + " hms";
+      labelTimeEndMeasured.Text = "";
+    }
+
+    private void buttonStop_Click(object sender, EventArgs e)
+    {
+      isStarting = false;
+      buttonStart.Enabled = true;
+      buttonStop.Enabled = false;
+      timer.Stop();
+      dtEndMeasurements = DateTime.Now;
+      labelTimeEndMeasured.Text = dtEndMeasurements.ToString("HH:mm:ss", System.Globalization.DateTimeFormatInfo.InvariantInfo) + " hms";
+    }
+
+    private void checkboxHoldOnTop_CheckedChanged(object sender, EventArgs e)
+    {
+      if (checkboxHoldOnTop.Checked) this.TopMost = true; else this.TopMost = false;
+    }
+
+    private void timer_Tick(object sender, EventArgs e)
+    {
+      //labelRuntimeMeasured.Text = (DateTime.Now - dtStartMeasurements).ToString("HH:mm:ss", System.Globalization.DateTimeFormatInfo.InvariantInfo) + " hms";
+      labelRuntimeMeasured.Text = (DateTime.Now - dtStartMeasurements).ToString();
+    }
+
+    private void buttonDriveC_Click(object sender, EventArgs e)
+    {
+      textboxPath.Text = "C:\\";
+      FileSystemWatcher.Path = textboxPath.Text;
     }
 
     private void NotifyIcon_MouseDoubleClick(object sender, MouseEventArgs e)
@@ -185,7 +262,6 @@ namespace DiskwatchCS
     {
       DiskWatchCS.AboutBoxForm formAboutBox = new DiskWatchCS.AboutBoxForm();
       formAboutBox.ShowDialog();
-
     }
   }
 }
