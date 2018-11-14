@@ -37,9 +37,19 @@ namespace DiskwatchCS
       {
         using (StreamWriter sw = new StreamWriter(SaveFileDialog.FileName))
         {
+          string line;
           foreach (ListViewItem lvi in listviewWatch.Items)
           {
-            sw.WriteLine(lvi.ToString());
+            line = "Die Datei '" + lvi.SubItems[2].ToString().Remove(lvi.SubItems[2].ToString().Length - 1).Remove(0,18) + "' wurde zum Zeitpunkt " + lvi.SubItems[1].ToString().Remove(lvi.SubItems[1].ToString().Length - 1).Remove(0, 18) + " ";
+            switch (lvi.ImageIndex)
+            {
+              case 0: line = line + "erstellt."; break;
+              case 1: line = line + "gelöscht."; break;
+              case 2: line = line + "geändert."; break;
+              case 3: line = line + "umbenannt."; break;
+              default: line = line + "offenbar nicht verändert."; break;
+            }
+            sw.WriteLine(line);
           }
         }
       }
@@ -58,26 +68,23 @@ namespace DiskwatchCS
     {
       textboxPath.Text = "C:\\";
       FileSystemWatcher.Path = textboxPath.Text;
-    }
-
-    private void FileSystemWatcher_Changed(object sender, FileSystemEventArgs e)
-    {
-      //listviewWatch.Items.Add(e.FullPath & " wurde geändert | " & DateAndTime.DateString & "/" & TimeOfDay).ForeColor = Color.Blue;
-      listviewWatch.Items.Add(e.FullPath + " wurde geändert | " + DateTime.Now.ToString("yyyyMMddHHmmss.fff", System.Globalization.DateTimeFormatInfo.InvariantInfo)).ForeColor = Color.Blue;
-      listviewWatch.EnsureVisible(listviewWatch.Items.Count - 1);
-      listviewWatch.Update();
-      longintCounterFilesChanged++;
+      listviewWatch.GridLines = true;
     }
 
     private void FileSystemWatcher_Created(object sender, FileSystemEventArgs e)
     {
-      listviewWatch.Items.Add(e.FullPath + " wurde erstellt | " + DateTime.Now.ToString("yyyyMMddHHmmss.fff", System.Globalization.DateTimeFormatInfo.InvariantInfo)).ForeColor = Color.Green;
-
       if (NotifyIcon.Visible)
       {
         NotifyIcon.BalloonTipText = e.FullPath + " wurde erstellt.";
         NotifyIcon.ShowBalloonTip(3000);
       }
+      ListViewItem lvi = new ListViewItem();
+      lvi.ImageIndex = 0;
+      lvi.ToolTipText = "Datei wurde erstellt";
+      lvi.ForeColor = Color.Green;
+      lvi.SubItems.Add(DateTime.Now.ToString("yyyyMMddHHmmss.fffffff", System.Globalization.DateTimeFormatInfo.InvariantInfo));
+      lvi.SubItems.Add(e.FullPath);
+      listviewWatch.Items.Add(lvi);
       listviewWatch.EnsureVisible(listviewWatch.Items.Count - 1);
       listviewWatch.Update();
       longintCounterFilesCreated++;
@@ -85,15 +92,41 @@ namespace DiskwatchCS
 
     private void FileSystemWatcher_Deleted(object sender, FileSystemEventArgs e)
     {
-      listviewWatch.Items.Add(e.FullPath + " wurde gelöscht | " + DateTime.Now.ToString("yyyyMMddHHmmss.fff", System.Globalization.DateTimeFormatInfo.InvariantInfo)).ForeColor = Color.Red;
+      ListViewItem lvi = new ListViewItem();
+      lvi.ImageIndex = 1;
+      lvi.ToolTipText = "Datei wurde gelöscht";
+      lvi.ForeColor = Color.Red;
+      lvi.SubItems.Add(DateTime.Now.ToString("yyyyMMddHHmmss.fffffff", System.Globalization.DateTimeFormatInfo.InvariantInfo));
+      lvi.SubItems.Add(e.FullPath);
+      listviewWatch.Items.Add(lvi);
       listviewWatch.EnsureVisible(listviewWatch.Items.Count - 1);
       listviewWatch.Update();
       longintCounterFilesDeleted++;
     }
 
+    private void FileSystemWatcher_Changed(object sender, FileSystemEventArgs e)
+    {
+      ListViewItem lvi = new ListViewItem();
+      lvi.ImageIndex = 2;
+      lvi.ToolTipText = "Datei wurde verändert";
+      lvi.ForeColor = Color.Blue;
+      lvi.SubItems.Add(DateTime.Now.ToString("yyyyMMddHHmmss.fffffff", System.Globalization.DateTimeFormatInfo.InvariantInfo));
+      lvi.SubItems.Add(e.FullPath);
+      listviewWatch.Items.Add(lvi);
+      listviewWatch.EnsureVisible(listviewWatch.Items.Count - 1);
+      listviewWatch.Update();
+      longintCounterFilesChanged++;
+    }
+
     private void FileSystemWatcher_Renamed(object sender, RenamedEventArgs e)
     {
-      listviewWatch.Items.Add(e.FullPath + " wurde umbenannt | " + DateTime.Now.ToString("yyyyMMddHHmmss.ffffff", System.Globalization.DateTimeFormatInfo.InvariantInfo)).ForeColor = Color.Black;
+      ListViewItem lvi = new ListViewItem();
+      lvi.ImageIndex = 3;
+      lvi.ToolTipText = "Datei wurde umbenannt";
+      lvi.ForeColor = Color.Black;
+      lvi.SubItems.Add(DateTime.Now.ToString("yyyyMMddHHmmss.fffffff", System.Globalization.DateTimeFormatInfo.InvariantInfo));
+      lvi.SubItems.Add(e.FullPath);
+      listviewWatch.Items.Add(lvi);
       listviewWatch.EnsureVisible(listviewWatch.Items.Count - 1);
       listviewWatch.Update();
       longintCounterFilesRenamed++;
@@ -134,7 +167,16 @@ namespace DiskwatchCS
       String line = "";
       foreach (ListViewItem lvi in listviewWatch.Items)
       {     
-        line = line + lvi.ToString() + "\r\n";
+        line = line + "Die Datei '" + lvi.SubItems[2].ToString().Remove(lvi.SubItems[2].ToString().Length - 1).Remove(0, 18) + "' wurde zum Zeitpunkt " + lvi.SubItems[1].ToString().Remove(lvi.SubItems[1].ToString().Length - 1).Remove(0, 18) + " ";
+        switch (lvi.ImageIndex)
+        {
+          case 0: line = line + "erstellt."; break;
+          case 1: line = line + "gelöscht."; break;
+          case 2: line = line + "geändert."; break;
+          case 3: line = line + "umbenannt."; break;
+          default: line = line + "offenbar nicht verändert."; break;
+        }
+        line = line + "\r\n";
       }
       System.Windows.Forms.Clipboard.SetText(line);
     }

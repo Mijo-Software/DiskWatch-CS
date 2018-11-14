@@ -36,7 +36,7 @@
       this.NotifyIcon = new System.Windows.Forms.NotifyIcon(this.components);
       this.buttonOpenFolder = new System.Windows.Forms.Button();
       this.listviewWatch = new System.Windows.Forms.ListView();
-      this.ColumnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+      this.ColumnHeaderPath = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
       this.buttonSaveList = new System.Windows.Forms.Button();
       this.buttonDeleteList = new System.Windows.Forms.Button();
       this.textboxPath = new System.Windows.Forms.TextBox();
@@ -44,6 +44,9 @@
       this.buttonCopyToClipboard = new System.Windows.Forms.Button();
       this.buttonShowInfos = new System.Windows.Forms.Button();
       this.buttonShowStatistics = new System.Windows.Forms.Button();
+      this.columnHeaderTimestamp = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+      this.columnHeaderIconState = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+      this.imageList = new System.Windows.Forms.ImageList(this.components);
       ((System.ComponentModel.ISupportInitialize)(this.FileSystemWatcher)).BeginInit();
       this.SuspendLayout();
       // 
@@ -81,23 +84,29 @@
       // 
       // listviewWatch
       // 
+      this.listviewWatch.AllowColumnReorder = true;
       this.listviewWatch.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-      this.listviewWatch.BackColor = System.Drawing.Color.Silver;
+      this.listviewWatch.BackColor = System.Drawing.Color.White;
+      this.listviewWatch.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
       this.listviewWatch.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
-            this.ColumnHeader1});
+            this.columnHeaderIconState,
+            this.columnHeaderTimestamp,
+            this.ColumnHeaderPath});
       this.listviewWatch.Location = new System.Drawing.Point(20, 41);
       this.listviewWatch.Name = "listviewWatch";
+      this.listviewWatch.ShowItemToolTips = true;
       this.listviewWatch.Size = new System.Drawing.Size(722, 287);
+      this.listviewWatch.SmallImageList = this.imageList;
       this.listviewWatch.TabIndex = 2;
       this.listviewWatch.UseCompatibleStateImageBehavior = false;
       this.listviewWatch.View = System.Windows.Forms.View.Details;
       // 
-      // ColumnHeader1
+      // ColumnHeaderPath
       // 
-      this.ColumnHeader1.Text = "Pfad";
-      this.ColumnHeader1.Width = 715;
+      this.ColumnHeaderPath.Text = "Pfad";
+      this.ColumnHeaderPath.Width = 500;
       // 
       // buttonSaveList
       // 
@@ -177,6 +186,25 @@
       this.buttonShowStatistics.UseVisualStyleBackColor = true;
       this.buttonShowStatistics.Click += new System.EventHandler(this.buttonShowStatistics_Click);
       // 
+      // columnHeaderTimestamp
+      // 
+      this.columnHeaderTimestamp.Text = "Zeitstempel";
+      this.columnHeaderTimestamp.Width = 150;
+      // 
+      // columnHeaderIconState
+      // 
+      this.columnHeaderIconState.Text = "";
+      this.columnHeaderIconState.Width = 20;
+      // 
+      // imageList
+      // 
+      this.imageList.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("imageList.ImageStream")));
+      this.imageList.TransparentColor = System.Drawing.Color.Transparent;
+      this.imageList.Images.SetKeyName(0, "add.png");
+      this.imageList.Images.SetKeyName(1, "delete.png");
+      this.imageList.Images.SetKeyName(2, "pencil.png");
+      this.imageList.Images.SetKeyName(3, "textfield_rename.png");
+      // 
       // Form
       // 
       this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -209,7 +237,6 @@
     internal System.IO.FileSystemWatcher FileSystemWatcher;
     internal System.Windows.Forms.Button buttonOpenFolder;
     internal System.Windows.Forms.ListView listviewWatch;
-    internal System.Windows.Forms.ColumnHeader ColumnHeader1;
     internal System.Windows.Forms.Button buttonSaveList;
     internal System.Windows.Forms.Button buttonDeleteList;
     internal System.Windows.Forms.TextBox textboxPath;
@@ -220,6 +247,10 @@
     private System.Windows.Forms.Button buttonCopyToClipboard;
     private System.Windows.Forms.Button buttonShowInfos;
     private System.Windows.Forms.Button buttonShowStatistics;
+    private System.Windows.Forms.ColumnHeader columnHeaderTimestamp;
+    private System.Windows.Forms.ColumnHeader ColumnHeaderPath;
+    private System.Windows.Forms.ColumnHeader columnHeaderIconState;
+    private System.Windows.Forms.ImageList imageList;
   }
 }
 
