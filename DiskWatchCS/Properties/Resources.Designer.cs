@@ -19,7 +19,7 @@ namespace DiskWatchCS.Properties {
     // -Klasse über ein Tool wie ResGen oder Visual Studio automatisch generiert.
     // Um einen Member hinzuzufügen oder zu entfernen, bearbeiten Sie die .ResX-Datei und führen dann ResGen
     // mit der /str-Option erneut aus, oder Sie erstellen Ihr VS-Projekt neu.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "4.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "16.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     internal class Resources {
@@ -101,12 +101,57 @@ namespace DiskWatchCS.Properties {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die C:\\ ähnelt.
+        /// </summary>
+        internal static string driveC {
+            get {
+                return ResourceManager.GetString("driveC", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
         /// </summary>
         internal static System.Drawing.Bitmap folder_vertical_open_32 {
             get {
                 object obj = ResourceManager.GetObject("folder_vertical_open_32", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die HH:mm:ss ähnelt.
+        /// </summary>
+        internal static string HHmmss {
+            get {
+                return ResourceManager.GetString("HHmmss", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die yyyyMMddHHmmss.fffffff ähnelt.
+        /// </summary>
+        internal static string yyyyMMddHHmmssfffffff {
+            get {
+                return ResourceManager.GetString("yyyyMMddHHmmssfffffff", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die 0 ähnelt.
+        /// </summary>
+        internal static string zero {
+            get {
+                return ResourceManager.GetString("zero", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die &quot;00.0000&quot; ähnelt.
+        /// </summary>
+        internal static string zeroSix {
+            get {
+                return ResourceManager.GetString("zeroSix", resourceCulture);
             }
         }
     }
