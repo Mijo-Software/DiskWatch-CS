@@ -1,105 +1,29 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Drawing;
-using System.Linq;
-using System.Reflection;
-using System.Threading.Tasks;
-using System.Windows.Forms;
+﻿using System.Windows.Forms;
+using MijoSoftware.AssemblyInformation;
 
 namespace DiskWatchCS
 {
-  partial class AboutBoxForm : Form
+  internal partial class AboutBoxForm : Form
   {
-    public AboutBoxForm()
-    {
-      InitializeComponent();
-      this.Text = String.Format("Info über {0}", AssemblyTitle);
-      this.labelProductName.Text = AssemblyProduct;
-      this.labelVersion.Text = String.Format("Version {0}", AssemblyVersion);
-      this.labelCopyright.Text = AssemblyCopyright;
-      this.labelCompanyName.Text = AssemblyCompany;
-      this.textBoxDescription.Text = AssemblyDescription;
-    }
+    /// <summary>
+    /// Constructor
+    /// </summary>
+    public AboutBoxForm() => InitializeComponent();
 
-    #region Assemblyattributaccessoren
-
-    public string AssemblyTitle
+    /// <summary>
+    /// Load the form
+    /// </summary>
+    /// <param name="sender">object sender</param>
+    /// <param name="e">event arguments</param>
+    /// <remarks>The parameters <paramref name="e"/> and <paramref name="sender"/> are not needed, but must be indicated.</remarks>
+    private void AboutBoxForm_Load(object sender, System.EventArgs e)
     {
-      get
-      {
-        object[] attributes = Assembly.GetExecutingAssembly().GetCustomAttributes(typeof(AssemblyTitleAttribute), false);
-        if (attributes.Length > 0)
-        {
-          AssemblyTitleAttribute titleAttribute = (AssemblyTitleAttribute)attributes[0];
-          if (titleAttribute.Title != "")
-          {
-            return titleAttribute.Title;
-          }
-        }
-        return System.IO.Path.GetFileNameWithoutExtension(Assembly.GetExecutingAssembly().CodeBase);
-      }
+      Text = $"Info über {AssemblyInfo.AssemblyTitle}";
+      labelProductName.Text = AssemblyInfo.AssemblyProduct;
+      labelVersion.Text = $"Version {AssemblyInfo.AssemblyVersion}";
+      labelCopyright.Text = AssemblyInfo.AssemblyCopyright;
+      labelCompanyName.Text = AssemblyInfo.AssemblyCompany;
+      textBoxDescription.Text = AssemblyInfo.AssemblyDescription;
     }
-
-    public string AssemblyVersion
-    {
-      get
-      {
-        return Assembly.GetExecutingAssembly().GetName().Version.ToString();
-      }
-    }
-
-    public string AssemblyDescription
-    {
-      get
-      {
-        object[] attributes = Assembly.GetExecutingAssembly().GetCustomAttributes(typeof(AssemblyDescriptionAttribute), false);
-        if (attributes.Length == 0)
-        {
-          return "";
-        }
-        return ((AssemblyDescriptionAttribute)attributes[0]).Description;
-      }
-    }
-
-    public string AssemblyProduct
-    {
-      get
-      {
-        object[] attributes = Assembly.GetExecutingAssembly().GetCustomAttributes(typeof(AssemblyProductAttribute), false);
-        if (attributes.Length == 0)
-        {
-          return "";
-        }
-        return ((AssemblyProductAttribute)attributes[0]).Product;
-      }
-    }
-
-    public string AssemblyCopyright
-    {
-      get
-      {
-        object[] attributes = Assembly.GetExecutingAssembly().GetCustomAttributes(typeof(AssemblyCopyrightAttribute), false);
-        if (attributes.Length == 0)
-        {
-          return "";
-        }
-        return ((AssemblyCopyrightAttribute)attributes[0]).Copyright;
-      }
-    }
-
-    public string AssemblyCompany
-    {
-      get
-      {
-        object[] attributes = Assembly.GetExecutingAssembly().GetCustomAttributes(typeof(AssemblyCompanyAttribute), false);
-        if (attributes.Length == 0)
-        {
-          return "";
-        }
-        return ((AssemblyCompanyAttribute)attributes[0]).Company;
-      }
-    }
-    #endregion
   }
 }

@@ -1,33 +1,68 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
+using System.Globalization;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
+using DiskWatchCS.Properties;
 
 namespace DiskwatchCS
 {
+  /// <summary>
+  /// MainForm
+  /// </summary>
   public partial class Form : System.Windows.Forms.Form
   {
+    private long counterFiles;
+    private long counterFilesChanged;
+    private long counterFilesDeleted;
+    private long counterFilesCreated;
+    private long counterFilesRenamed;
+    private bool isStarting;
+    private DateTime startMeasurements;
 
-    long longintCounterFiles, longintCounterFilesChanged, longintCounterFilesDeleted, longintCounterFilesCreated, longintCounterFilesRenamed;
-    bool isStarting;
-    DateTime dtStartMeasurements, dtEndMeasurements;
+    /// <summary>
+		/// Culture info
+		/// </summary>
+		private static readonly CultureInfo culture = CultureInfo.CurrentUICulture;
 
-    public Form()
-    {
-      InitializeComponent();
-    }
+    /// <summary>
+    /// Constructor
+    /// </summary>
+    public Form() => InitializeComponent();
 
-    private void buttonOpenFolder_Click(object sender, EventArgs e)
+    /// <summary>
+		/// Set a specific text to the status bar
+		/// </summary>
+		/// <param name="text">text with some information</param>
+		private void SetStatusbarText(string text) => labelInformation.Text = text;
+
+    /// <summary>
+		/// Detect the accessibility description to set as information text in the status bar
+		/// </summary>
+		/// <param name="sender">object sender</param>
+		/// <param name="e">event arguments</param>
+		/// <remarks>The parameter <paramref name="e"/> is not needed, but must be indicated.</remarks>
+		private void SetStatusbar_Enter(object sender, EventArgs e) => SetStatusbarText(text: ((Control)sender).AccessibleDescription);
+
+    /// <summary>
+    /// Clear the information text of the status bar
+    /// </summary>
+    /// <param name="sender">object sender</param>
+    /// <param name="e">event arguments</param>
+    /// <remarks>The parameters <paramref name="e"/> and <paramref name="sender"/> are not needed, but must be indicated.</remarks>
+    private void ClearStatusbar_Leave(object sender, EventArgs e) => SetStatusbarText(text: string.Empty);
+
+    /// <summary>
+    /// Indicate a specific directory
+    /// </summary>
+    /// <param name="sender">object sender</param>
+    /// <param name="e">event arguments</param>
+    /// <remarks>The parameters <paramref name="e"/> and <paramref name="sender"/> are not needed, but must be indicated.</remarks>
+    private void ButtonOpenFolder_Click(object sender, EventArgs e)
     {
       if (FolderBrowserDialog.ShowDialog() == DialogResult.OK)
       {
-        if (Directory.Exists(FolderBrowserDialog.SelectedPath))
+        if (Directory.Exists(path: FolderBrowserDialog.SelectedPath))
         {
           textboxPath.Text = FolderBrowserDialog.SelectedPath;
           FileSystemWatcher.Path = textboxPath.Text;
@@ -35,233 +70,332 @@ namespace DiskwatchCS
       }
     }
 
-    private void buttonSaveList_Click(object sender, EventArgs e)
+    /// <summary>
+    /// Save the list
+    /// </summary>
+    /// <param name="sender">object sender</param>
+    /// <param name="e">event arguments</param>
+    /// <remarks>The parameters <paramref name="e"/> and <paramref name="sender"/> are not needed, but must be indicated.</remarks>
+    private void ButtonSaveList_Click(object sender, EventArgs e)
     {
       if (SaveFileDialog.ShowDialog() == DialogResult.OK)
       {
-        using (StreamWriter sw = new StreamWriter(SaveFileDialog.FileName))
+        using (StreamWriter sw = new StreamWriter(path: SaveFileDialog.FileName))
         {
           string line;
           foreach (ListViewItem lvi in listviewWatch.Items)
           {
-            line = "Die Datei '" + lvi.SubItems[2].ToString().Remove(lvi.SubItems[2].ToString().Length - 1).Remove(0,18) + "' wurde zum Zeitpunkt " + lvi.SubItems[1].ToString().Remove(lvi.SubItems[1].ToString().Length - 1).Remove(0, 18) + " ";
+            line = $"Die Datei '{lvi.SubItems[index: 2].ToString().Remove(startIndex: lvi.SubItems[index: 2].ToString().Length - 1).Remove(startIndex: 0, count: 18)}' wurde zum Zeitpunkt {lvi.SubItems[index: 1].ToString().Remove(startIndex: lvi.SubItems[index: 1].ToString().Length - 1).Remove(startIndex: 0, count: 18)} ";
             switch (lvi.ImageIndex)
             {
-              case 0: line = line + "erstellt."; break;
-              case 1: line = line + "gelöscht."; break;
-              case 2: line = line + "geändert."; break;
-              case 3: line = line + "umbenannt."; break;
-              default: line = line + "offenbar nicht verändert."; break;
+              case 0: line += "erstellt."; break;
+              case 1: line += "gelöscht."; break;
+              case 2: line += "geändert."; break;
+              case 3: line += "umbenannt."; break;
+              default: line += "offenbar nicht verändert."; break;
             }
-            sw.WriteLine(line);
+            sw.WriteLine(value: line);
           }
         }
       }
     }
 
-    private void buttonDeleteList_Click(object sender, EventArgs e)
+    /// <summary>
+    /// Delete the list
+    /// </summary>
+    /// <param name="sender">object sender</param>
+    /// <param name="e">event arguments</param>
+    /// <remarks>The parameters <paramref name="e"/> and <paramref name="sender"/> are not needed, but must be indicated.</remarks>
+    private void ButtonDeleteList_Click(object sender, EventArgs e)
     {
       listviewWatch.Items.Clear();
-      longintCounterFilesCreated = 0;
-      longintCounterFilesDeleted = 0;
-      longintCounterFilesChanged = 0;
-      longintCounterFilesRenamed = 0;
-      labelCounterFiles.Text = "0";
-      labelCounterFilesCreated.Text = "0";
-      labelCounterFilesDeleted.Text = "0";
-      labelCounterFilesChanged.Text = "0";
-      labelCounterFilesRenamed.Text = "0";
+      counterFilesCreated = 0;
+      counterFilesDeleted = 0;
+      counterFilesChanged = 0;
+      counterFilesRenamed = 0;
+      labelCounterFiles.Text = Resources.zero;
+      labelCounterFilesCreated.Text = Resources.zero;
+      labelCounterFilesDeleted.Text = Resources.zero;
+      labelCounterFilesChanged.Text = Resources.zero;
+      labelCounterFilesRenamed.Text = Resources.zero;
     }
 
+    /// <summary>
+    /// Load the form
+    /// </summary>
+    /// <param name="sender">object sender</param>
+    /// <param name="e">event arguments</param>
+    /// <remarks>The parameters <paramref name="e"/> and <paramref name="sender"/> are not needed, but must be indicated.</remarks>
     private void Form_Load(object sender, EventArgs e)
     {
-      textboxPath.Text = "C:\\";
+      labelInformation.Text = string.Empty;
+      textboxPath.Text = Resources.driveC;
       FileSystemWatcher.Path = textboxPath.Text;
       listviewWatch.GridLines = true;
       isStarting = true;
       checkboxHoldOnTop.Checked = false;
       checkboxMinimizeToSystemtray.Checked = false;
       buttonStart.Enabled = false;
-      labelCounterFiles.Text = "0";
-      labelCounterFilesCreated.Text = "0";
-      labelCounterFilesDeleted.Text = "0";
-      labelCounterFilesRenamed.Text = "0";
-      labelCounterFilesDeleted.Text = "0";
-      dtStartMeasurements = DateTime.Now;
-      labelTimeBeginMeasured.Text = dtStartMeasurements.ToString("HH:mm:ss", System.Globalization.DateTimeFormatInfo.InvariantInfo) + " hms";
-      labelTimeEndMeasured.Text = "";
+      labelCounterFiles.Text = Resources.zero;
+      labelCounterFilesCreated.Text = Resources.zero;
+      labelCounterFilesDeleted.Text = Resources.zero;
+      labelCounterFilesChanged.Text = Resources.zero;
+      labelCounterFilesRenamed.Text = Resources.zero;
+      startMeasurements = DateTime.Now;
+      labelTimeBeginMeasured.Text = $"{startMeasurements.ToString(format: Resources.HHmmss, provider: culture)} hms";
+      labelTimeEndMeasured.Text = string.Empty;
       timer.Start();
     }
 
+    /// <summary>
+    /// Update the list while a file was created
+    /// </summary>
+    /// <param name="sender">object sender</param>
+    /// <param name="e">event arguments</param>
+    /// <remarks>The parameters <paramref name="sender"/> is not needed, but must be indicated.</remarks>
     private void FileSystemWatcher_Created(object sender, FileSystemEventArgs e)
     {
       if (isStarting)
       {
         if (NotifyIcon.Visible)
         {
-          NotifyIcon.BalloonTipText = e.FullPath + " wurde erstellt.";
-          NotifyIcon.ShowBalloonTip(3000);
+          NotifyIcon.BalloonTipText = $"{e.FullPath} wurde erstellt.";
+          NotifyIcon.ShowBalloonTip(timeout: 3000);
         }
-        ListViewItem lvi = new ListViewItem();
-        lvi.ImageIndex = 0;
-        lvi.ToolTipText = "Datei wurde erstellt";
-        lvi.ForeColor = Color.Green;
-        lvi.SubItems.Add(DateTime.Now.ToString("yyyyMMddHHmmss.fffffff", System.Globalization.DateTimeFormatInfo.InvariantInfo));
-        lvi.SubItems.Add(e.FullPath);
-        listviewWatch.Items.Add(lvi);
-        listviewWatch.EnsureVisible(listviewWatch.Items.Count - 1);
+        ListViewItem lvi = new ListViewItem
+        {
+          ImageIndex = 0,
+          ToolTipText = "Datei wurde erstellt",
+          ForeColor = Color.Green
+        };
+        lvi.SubItems.Add(text: DateTime.Now.ToString(format: Resources.yyyyMMddHHmmssfffffff, provider: culture));
+        lvi.SubItems.Add(text: e.FullPath);
+        listviewWatch.Items.Add(value: lvi);
+        listviewWatch.EnsureVisible(index: listviewWatch.Items.Count - 1);
         listviewWatch.Update();
-        longintCounterFilesCreated++;
-        longintCounterFiles = longintCounterFilesCreated + longintCounterFilesChanged + longintCounterFilesRenamed + longintCounterFilesDeleted;
-        labelCounterFilesCreated.Text = longintCounterFilesCreated.ToString();
-        labelCounterFilesCreatedPercent.Text = (longintCounterFilesCreated / (float)longintCounterFiles * 100.0).ToString("00.0000") + "%";
-        labelCounterFiles.Text = longintCounterFiles.ToString();
+        counterFilesCreated++;
+        counterFiles = counterFilesCreated + counterFilesChanged + counterFilesRenamed + counterFilesDeleted;
+        labelCounterFilesCreated.Text = counterFilesCreated.ToString(provider: culture);
+        labelCounterFilesCreatedPercent.Text = $"{(counterFilesCreated / (float)counterFiles * 100.0).ToString(format: Resources.zeroSix, provider: culture)}%";
+        labelCounterFiles.Text = counterFiles.ToString(provider: culture);
       }
     }
 
+    /// <summary>
+    /// Update the list while a file was deleted
+    /// </summary>
+    /// <param name="sender">object sender</param>
+    /// <param name="e">event arguments</param>
+    /// <remarks>The parameters <paramref name="sender"/> is not needed, but must be indicated.</remarks>
     private void FileSystemWatcher_Deleted(object sender, FileSystemEventArgs e)
     {
       if (isStarting)
       {
-        ListViewItem lvi = new ListViewItem();
-        lvi.ImageIndex = 1;
-        lvi.ToolTipText = "Datei wurde gelöscht";
-        lvi.ForeColor = Color.Red;
-        lvi.SubItems.Add(DateTime.Now.ToString("yyyyMMddHHmmss.fffffff", System.Globalization.DateTimeFormatInfo.InvariantInfo));
-        lvi.SubItems.Add(e.FullPath);
-        listviewWatch.Items.Add(lvi);
-        listviewWatch.EnsureVisible(listviewWatch.Items.Count - 1);
+        ListViewItem lvi = new ListViewItem
+        {
+          ImageIndex = 1,
+          ToolTipText = "Datei wurde gelöscht",
+          ForeColor = Color.Red
+        };
+        lvi.SubItems.Add(text: DateTime.Now.ToString(format: Resources.yyyyMMddHHmmssfffffff, provider: culture));
+        lvi.SubItems.Add(text: e.FullPath);
+        listviewWatch.Items.Add(value: lvi);
+        listviewWatch.EnsureVisible(index: listviewWatch.Items.Count - 1);
         listviewWatch.Update();
-        longintCounterFilesDeleted++;
-        longintCounterFiles = longintCounterFilesCreated + longintCounterFilesChanged + longintCounterFilesRenamed + longintCounterFilesDeleted;
-        labelCounterFilesDeleted.Text = longintCounterFilesDeleted.ToString();
-        labelCounterFilesDeletedPercent.Text = (longintCounterFilesDeleted / (float)longintCounterFiles * 100.0).ToString("00.0000") + "%";
-        labelCounterFiles.Text = longintCounterFiles.ToString();
+        counterFilesDeleted++;
+        counterFiles = counterFilesCreated + counterFilesChanged + counterFilesRenamed + counterFilesDeleted;
+        labelCounterFilesDeleted.Text = counterFilesDeleted.ToString(provider: culture);
+        labelCounterFilesDeletedPercent.Text = $"{(counterFilesDeleted / (float)counterFiles * 100.0).ToString(format: Resources.zeroSix, provider: culture)}%";
+        labelCounterFiles.Text = counterFiles.ToString(provider: culture);
       }
     }
 
+    /// <summary>
+    /// Update the list while a file was changed
+    /// </summary>
+    /// <param name="sender">object sender</param>
+    /// <param name="e">event arguments</param>
+    /// <remarks>The parameters <paramref name="sender"/> is not needed, but must be indicated.</remarks>
     private void FileSystemWatcher_Changed(object sender, FileSystemEventArgs e)
     {
       if (isStarting)
       {
-        ListViewItem lvi = new ListViewItem();
-        lvi.ImageIndex = 2;
-        lvi.ToolTipText = "Datei wurde verändert";
-        lvi.ForeColor = Color.Blue;
-        lvi.SubItems.Add(DateTime.Now.ToString("yyyyMMddHHmmss.fffffff", System.Globalization.DateTimeFormatInfo.InvariantInfo));
-        lvi.SubItems.Add(e.FullPath);
-        listviewWatch.Items.Add(lvi);
-        listviewWatch.EnsureVisible(listviewWatch.Items.Count - 1);
+        ListViewItem lvi = new ListViewItem
+        {
+          ImageIndex = 2,
+          ToolTipText = "Datei wurde verändert",
+          ForeColor = Color.Blue
+        };
+        lvi.SubItems.Add(text: DateTime.Now.ToString(format: Resources.yyyyMMddHHmmssfffffff, provider: culture));
+        lvi.SubItems.Add(text: e.FullPath);
+        listviewWatch.Items.Add(value: lvi);
+        listviewWatch.EnsureVisible(index: listviewWatch.Items.Count - 1);
         listviewWatch.Update();
-        longintCounterFilesChanged++;
-        longintCounterFiles = longintCounterFilesCreated + longintCounterFilesChanged + longintCounterFilesRenamed + longintCounterFilesDeleted;
-        labelCounterFilesChanged.Text = longintCounterFilesChanged.ToString();
-        labelCounterFilesChangedPercent.Text = (longintCounterFilesChanged / (float)longintCounterFiles * 100.0).ToString("00.0000") + "%";
-        labelCounterFiles.Text = longintCounterFiles.ToString();
+        counterFilesChanged++;
+        counterFiles = counterFilesCreated + counterFilesChanged + counterFilesRenamed + counterFilesDeleted;
+        labelCounterFilesChanged.Text = counterFilesChanged.ToString(provider: culture);
+        labelCounterFilesChangedPercent.Text = $"{(counterFilesChanged / (float)counterFiles * 100.0).ToString(format: Resources.zeroSix, provider: culture)}%";
+        labelCounterFiles.Text = counterFiles.ToString(provider: culture);
       }
     }
 
+    /// <summary>
+    /// Update the list while a file was renamed
+    /// </summary>
+    /// <param name="sender">object sender</param>
+    /// <param name="e">event arguments</param>
+    /// <remarks>The parameters <paramref name="sender"/> is not needed, but must be indicated.</remarks>
     private void FileSystemWatcher_Renamed(object sender, RenamedEventArgs e)
     {
       if (isStarting)
       {
-        ListViewItem lvi = new ListViewItem();
-        lvi.ImageIndex = 3;
-        lvi.ToolTipText = "Datei wurde umbenannt";
-        lvi.ForeColor = Color.Black;
-        lvi.SubItems.Add(DateTime.Now.ToString("yyyyMMddHHmmss.fffffff", System.Globalization.DateTimeFormatInfo.InvariantInfo));
-        lvi.SubItems.Add(e.FullPath);
-        listviewWatch.Items.Add(lvi);
-        listviewWatch.EnsureVisible(listviewWatch.Items.Count - 1);
+        ListViewItem lvi = new ListViewItem
+        {
+          ImageIndex = 3,
+          ToolTipText = "Datei wurde umbenannt",
+          ForeColor = Color.Black
+        };
+        lvi.SubItems.Add(text: DateTime.Now.ToString(format: Resources.yyyyMMddHHmmssfffffff, provider: culture));
+        lvi.SubItems.Add(text: e.FullPath);
+        listviewWatch.Items.Add(value: lvi);
+        listviewWatch.EnsureVisible(index: listviewWatch.Items.Count - 1);
         listviewWatch.Update();
-        longintCounterFilesRenamed++;
-        longintCounterFiles = longintCounterFilesCreated + longintCounterFilesChanged + longintCounterFilesRenamed + longintCounterFilesDeleted;
-        labelCounterFilesRenamed.Text = longintCounterFilesRenamed.ToString();
-        labelCounterFilesRenamedPercent.Text = (longintCounterFilesRenamed / (float)longintCounterFiles * 100.0).ToString("00.0000") + "%";
-        labelCounterFiles.Text = longintCounterFiles.ToString();
+        counterFilesRenamed++;
+        counterFiles = counterFilesCreated + counterFilesChanged + counterFilesRenamed + counterFilesDeleted;
+        labelCounterFilesRenamed.Text = counterFilesRenamed.ToString(provider: culture);
+        labelCounterFilesRenamedPercent.Text = $"{(counterFilesRenamed / (float)counterFiles * 100.0).ToString(format: Resources.zeroSix, provider: culture)}%";
+        labelCounterFiles.Text = counterFiles.ToString(provider: culture);
       }
     }
 
+    /// <summary>
+    /// Minimize to tray
+    /// </summary>
+    /// <param name="sender">object sender</param>
+    /// <param name="e">event arguments</param>
+    /// <remarks>The parameters <paramref name="e"/> and <paramref name="sender"/> are not needed, but must be indicated.</remarks>
     private void Form_SizeChanged(object sender, EventArgs e)
     {
-      if (this.WindowState == FormWindowState.Minimized)
+      if (WindowState == FormWindowState.Minimized)
       {
         if (checkboxMinimizeToSystemtray.Checked)
         {
-          this.Hide();
+          Hide();
           NotifyIcon.Visible = true;
         }
       }
     }
 
-    private void buttonStart_Click(object sender, EventArgs e)
+    /// <summary>
+    /// Start the watching
+    /// </summary>
+    /// <param name="sender">object sender</param>
+    /// <param name="e">event arguments</param>
+    /// <remarks>The parameters <paramref name="e"/> and <paramref name="sender"/> are not needed, but must be indicated.</remarks>
+    private void ButtonStart_Click(object sender, EventArgs e)
     {
       isStarting = true;
       buttonStart.Enabled = false;
       buttonStop.Enabled = true;
       timer.Start();
-      dtStartMeasurements = DateTime.Now;
-      labelTimeBeginMeasured.Text = dtStartMeasurements.ToString("HH:mm:ss", System.Globalization.DateTimeFormatInfo.InvariantInfo) + " hms";
-      labelTimeEndMeasured.Text = "";
+      startMeasurements = DateTime.Now;
+      labelTimeBeginMeasured.Text = $"{startMeasurements.ToString(format: Resources.HHmmss, provider: culture)} hms";
+      labelTimeEndMeasured.Text = string.Empty;
     }
 
-    private void buttonStop_Click(object sender, EventArgs e)
+    /// <summary>
+    /// Stop the watching
+    /// </summary>
+    /// <param name="sender">object sender</param>
+    /// <param name="e">event arguments</param>
+    /// <remarks>The parameters <paramref name="e"/> and <paramref name="sender"/> are not needed, but must be indicated.</remarks>
+    private void ButtonStop_Click(object sender, EventArgs e)
     {
       isStarting = false;
       buttonStart.Enabled = true;
       buttonStop.Enabled = false;
       timer.Stop();
-      dtEndMeasurements = DateTime.Now;
-      labelTimeEndMeasured.Text = dtEndMeasurements.ToString("HH:mm:ss", System.Globalization.DateTimeFormatInfo.InvariantInfo) + " hms";
+      labelTimeEndMeasured.Text = $"{startMeasurements.ToString(format: Resources.HHmmss, provider: culture)} hms";
     }
 
-    private void checkboxHoldOnTop_CheckedChanged(object sender, EventArgs e)
-    {
-      if (checkboxHoldOnTop.Checked) this.TopMost = true; else this.TopMost = false;
-    }
+    /// <summary>
+    /// Hold the window in foreground
+    /// </summary>
+    /// <param name="sender">object sender</param>
+    /// <param name="e">event arguments</param>
+    /// <remarks>The parameters <paramref name="e"/> and <paramref name="sender"/> are not needed, but must be indicated.</remarks>
+    private void CheckboxHoldOnTop_CheckedChanged(object sender, EventArgs e) => TopMost = checkboxHoldOnTop.Checked;
 
-    private void timer_Tick(object sender, EventArgs e)
-    {
-      //labelRuntimeMeasured.Text = (DateTime.Now - dtStartMeasurements).ToString("HH:mm:ss", System.Globalization.DateTimeFormatInfo.InvariantInfo) + " hms";
-      labelRuntimeMeasured.Text = (DateTime.Now - dtStartMeasurements).ToString();
-    }
+    /// <summary>
+    /// Measure the current runtime
+    /// </summary>
+    /// <param name="sender">object sender</param>
+    /// <param name="e">event arguments</param>
+    /// <remarks>The parameters <paramref name="e"/> and <paramref name="sender"/> are not needed, but must be indicated.</remarks>
+    private void Timer_Tick(object sender, EventArgs e) => labelRuntimeMeasured.Text = (DateTime.Now - startMeasurements).ToString();
 
-    private void buttonDriveC_Click(object sender, EventArgs e)
+    /// <summary>
+    /// Indicate the drive C:
+    /// </summary>
+    /// <param name="sender">object sender</param>
+    /// <param name="e">event arguments</param>
+    /// <remarks>The parameters <paramref name="e"/> and <paramref name="sender"/> are not needed, but must be indicated.</remarks>
+    private void ButtonDriveC_Click(object sender, EventArgs e)
     {
-      textboxPath.Text = "C:\\";
+      textboxPath.Text = Resources.driveC;
       FileSystemWatcher.Path = textboxPath.Text;
     }
 
+    /// <summary>
+    /// Open the window from the notify tray icon
+    /// </summary>
+    /// <param name="sender">object sender</param>
+    /// <param name="e">event arguments</param>
+    /// <remarks>The parameters <paramref name="e"/> and <paramref name="sender"/> are not needed, but must be indicated.</remarks>
     private void NotifyIcon_MouseDoubleClick(object sender, MouseEventArgs e)
     {
       NotifyIcon.Visible = false;
-      this.Show();
-      this.WindowState = FormWindowState.Normal;
+      Show();
+      WindowState = FormWindowState.Normal;
     }
 
-    private void buttonCopyToClipboard_Click(object sender, EventArgs e)
+    /// <summary>
+    /// Copy the list to the clipboard
+    /// </summary>
+    /// <param name="sender">object sender</param>
+    /// <param name="e">event arguments</param>
+    /// <remarks>The parameters <paramref name="e"/> and <paramref name="sender"/> are not needed, but must be indicated.</remarks>
+    private void ButtonCopyToClipboard_Click(object sender, EventArgs e)
     {
-      String line = "";
+      string line = string.Empty;
       foreach (ListViewItem lvi in listviewWatch.Items)
-      {     
-        line = line + "Die Datei '" + lvi.SubItems[2].ToString().Remove(lvi.SubItems[2].ToString().Length - 1).Remove(0, 18) + "' wurde zum Zeitpunkt " + lvi.SubItems[1].ToString().Remove(lvi.SubItems[1].ToString().Length - 1).Remove(0, 18) + " ";
+      {
+        line = $"{line}Die Datei '{lvi.SubItems[index: 2].ToString().Remove(startIndex: lvi.SubItems[index: 2].ToString().Length - 1).Remove(startIndex: 0, count: 18)}' wurde zum Zeitpunkt {lvi.SubItems[index: 1].ToString().Remove(startIndex: lvi.SubItems[index: 1].ToString().Length - 1).Remove(startIndex: 0, count: 18)} ";
         switch (lvi.ImageIndex)
         {
-          case 0: line = line + "erstellt."; break;
-          case 1: line = line + "gelöscht."; break;
-          case 2: line = line + "geändert."; break;
-          case 3: line = line + "umbenannt."; break;
-          default: line = line + "offenbar nicht verändert."; break;
+          case 0: line += "erstellt."; break;
+          case 1: line += "gelöscht."; break;
+          case 2: line += "geändert."; break;
+          case 3: line += "umbenannt."; break;
+          default: line += "offenbar nicht verändert."; break;
         }
-        line = line + "\r\n";
+        line += "\r\n";
       }
-      System.Windows.Forms.Clipboard.SetText(line);
+      Clipboard.SetText(text: line);
     }
 
-    private void buttonShowInfos_Click(object sender, EventArgs e)
+    /// <summary>
+    /// Show the information window
+    /// </summary>
+    /// <param name="sender">object sender</param>
+    /// <param name="e">event arguments</param>
+    /// <remarks>The parameters <paramref name="e"/> and <paramref name="sender"/> are not needed, but must be indicated.</remarks>
+    private void ButtonShowInfos_Click(object sender, EventArgs e)
     {
-      DiskWatchCS.AboutBoxForm formAboutBox = new DiskWatchCS.AboutBoxForm();
-      formAboutBox.ShowDialog();
+      using (DiskWatchCS.AboutBoxForm formAboutBox = new DiskWatchCS.AboutBoxForm())
+      {
+        formAboutBox.ShowDialog();
+      }
     }
   }
 }

@@ -1,22 +1,22 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace DiskwatchCS
 {
-  static class Program
+  /// <summary>
+  /// Program
+  /// </summary>
+  internal static class Program
   {
     /// <summary>
-    /// Der Haupteinstiegspunkt für die Anwendung.
+    /// main entrance point of the application
     /// </summary>
     [STAThread]
-    static void Main()
+    private static void Main()
     {
       Application.EnableVisualStyles();
-      Application.SetCompatibleTextRenderingDefault(false);
-      Application.Run(new Form());
+      Application.SetCompatibleTextRenderingDefault(defaultValue: false);
+      Application.Run(mainForm: new Form());
     }
   }
 }
